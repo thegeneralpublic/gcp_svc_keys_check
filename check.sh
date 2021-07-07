@@ -6,6 +6,7 @@ gcloud iam service-accounts list --project=<> --format=json --flatten=email | se
 # echo $list > svc.txt
 for email in `cat svc`;
 do
+    echo "----------------------------------------------"
     echo $email
     key_date=`gcloud iam service-accounts keys list --iam-account=$email --format=json --format='value(validAfterTime)'`
     key_date1=(`echo $key_date |cut -b-10`)
@@ -17,6 +18,15 @@ do
     #difference= $(date --date="${now} - ${key_date1}" +"%Y-%m-%d")
     difference=$((($(date -u -d $now +%s) - $(date -u -d $key_date1 +%s)) / 86400))
     echo $difference
-
+    check=90
+    if [[$difference >= $check]];
+    then
+        echo "svc account $email key needs to be rotated"
+        #gcloud iam service-accounts keys list --iam-account=$email --format=json
+    else
+        echo "svc account $email key have to live for atleast 90 days"
+        #gcloud iam service-accounts keys list --iam-account=$email --format=json
+    fi
+    echo "----------------------------------------------"
 done
 
